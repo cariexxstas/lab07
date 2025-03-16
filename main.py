@@ -27,29 +27,39 @@ class PreciseDuration(Duration):
     def __str__(self):
         return f"{super().__str__()}:{self.__seconds:02}"
 
-def read_durations_from_file(filename):
-    durations = []
-    names = []
+class Event:
+    def __init__(self, name: str, duration: PreciseDuration):
+        self.__name = name
+        self.__duration = duration
+    
+    def get_duration(self):
+        return self.__duration
+    
+    def __str__(self):
+        return f"{self.__name} - {self.__duration}"
+
+def read_events_from_file(filename):
+    events = []
     with open(filename, 'r') as file:
         for line in file:
             name, h, m, s = line.strip().split(', ')
-            durations.append(PreciseDuration(int(h), int(m), int(s)))
-            names.append(name)
-    return names, durations
+            duration = PreciseDuration(int(h), int(m), int(s))
+            events.append(Event(name, duration))
+    return events
 
-def analyze_durations(durations):
-    total_duration = sum(d.get_total_minutes() for d in durations)
-    shortest = min(durations, key=lambda d: d.get_total_minutes())
-    longest = max(durations, key=lambda d: d.get_total_minutes())
+def analyze_events(events):
+    total_duration = sum(event.get_duration().get_total_minutes() for event in events)
+    shortest = min(events, key=lambda e: e.get_duration())
+    longest = max(events, key=lambda e: e.get_duration())
     return total_duration, shortest, longest
 
 if __name__ == "__main__":
-    names, durations = read_durations_from_file("events.txt")
-    total, shortest, longest = analyze_durations(durations)
+    events = read_events_from_file("events.txt")
+    total, shortest, longest = analyze_events(events)
     
     print("Перелік подій:")
-    for name, duration in zip(names, durations):
-        print(f"{name} - {duration}")
+    for event in events:
+        print(event)
     
     print(f"\nЗагальна тривалість: {total} хвилин")
     print(f"Найкоротша подія: {shortest}")
